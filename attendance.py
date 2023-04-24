@@ -169,7 +169,7 @@ class Attendance:
     #import CSV
     def import_csv(self):
         global mydata
-        mydata.clear()
+        # mydata.clear()
         fln = filedialog.askopenfilename(initialdir=os.getcwd(),title="Open Csv",filetypes=(("CSV File","*.csv"),("ALL File","*.*")),parent=self.root)
         with open(fln) as myfile:
             csvread = csv.reader(myfile,delimiter=",")
