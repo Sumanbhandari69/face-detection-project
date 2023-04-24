@@ -456,7 +456,7 @@ class Student:
 
                 def face_cropped(img):
                     gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-                    faces = face_classifier.detectMultiScale(gray,1.3,5)
+                    faces = face_classifier.detectMultiScale(gray,1.1,5)
                     #scaling factor = 1.3
                     #minimum neighbour=5
 
@@ -477,7 +477,7 @@ class Student:
                         cv2.putText(face,str(img_id),(50,50),cv2.FONT_HERSHEY_COMPLEX,2,(0,255,0),2)
                         cv2.imshow("Croppped Face",face)
 
-                    if cv2.waitKey(1)==13 or int(img_id)==100:
+                    if cv2.waitKey(1)==13 or int(img_id)==200:
                         break
                 cap.release()
                 cv2.destroyAllWindows()
