@@ -7,7 +7,10 @@ import cv2
 import numpy as np
 from tkinter import messagebox
 import mysql.connector
-# import cv2.face
+from time import strftime
+from datetime import datetime
+from attendance import Attendance
+#import cv2.face
 
 class Face_Recognition_System:
     def __init__(self,root):
@@ -54,10 +57,10 @@ class Face_Recognition_System:
         img3 = img3.resize((250, 250), Image.LANCZOS)
         self.photoimg3 = ImageTk.PhotoImage(img3)
 
-        b3 = Button(bg_img, image=self.photoimg3, cursor="hand2")
+        b3 = Button(bg_img, image=self.photoimg3,command=self.attendance_data, cursor="hand2")
         b3.place(x=1000, y=100, width=250, height=250)
 
-        b3_1 = Button(bg_img, text="Attendance", cursor="hand2", font=("times new roman", 20, "bold"),bg="blue",fg="white")
+        b3_1 = Button(bg_img, text="Attendance",command=self.attendance_data, cursor="hand2", font=("times new roman", 20, "bold"),bg="blue",fg="white")
         b3_1.place(x=1000, y=350, width=250, height=40)
 
         # Train dataset Button
@@ -116,6 +119,7 @@ class Face_Recognition_System:
             cv2.imshow("Training",imagenp)
             cv2.waitKey(1)==13
 
+
         ids = np.array(ids)
 
         #Train classifier and save
@@ -124,6 +128,21 @@ class Face_Recognition_System:
         clf.write("classifier.xml")
         cv2.destroyAllWindows()
         messagebox.showinfo("Result","Training datasets completed!!")
+    #Attendance
+    def mark_attendance(self,i,r,n,d):
+        with open ("Attendance.csv","r+",newline="\n") as f:
+            myDatalist = f.readline()
+            name_list =[]
+            for line in myDatalist:
+                entry = line.split((","))
+                name_list.append(entry[0])
+
+            if((i not in name_list) and (d not in name_list) and (n not in name_list) and (r not in name_list)):
+                now = datetime.now()
+                d1 = now.strftime("%d/%m/%Y")
+                dtString = now.strftime("%H:%M:%S")
+                f.writelines(f"\n{i},{r},{n},{d},{dtString},{d1},Present")
+
 
 
     #face recognition
@@ -137,28 +156,35 @@ class Face_Recognition_System:
                 cv2.rectangle(img,(x,y),(x+w,y+h),(0,255,0),3)
                 id,predict=clf.predict(gray_image[y:y+h,x:x+w])
                 confidence =int((100*(1-predict/300)))
+                print(confidence)
 
                 conn = mysql.connector.connect(host="localhost", username="root", password="9818913355",
                                                database="face_recognition")
                 my_cursor = conn.cursor()
                 my_cursor.execute("select Name from student where Student_ID="+str(id))
                 n = my_cursor.fetchone()
-                n = "".join(str(n))
+                n = "+".join(n)
 
                 my_cursor.execute("select Roll from student where Student_ID=" + str(id))
                 r = my_cursor.fetchone()
-                r = "".join(str(r))
+                r = "+".join(r)
 
                 my_cursor.execute("select Dep from student where Student_ID=" + str(id))
                 d = my_cursor.fetchone()
-                d = "".join(str(d))
+                d = "+".join(d)
+
+                my_cursor.execute("select Student_ID from student where Student_ID=" + str(id))
+                i = my_cursor.fetchone()
+                i = "+".join(i)
 
 
 
-                if confidence>77:
+                if confidence>70:
+                    cv2.putText(img, f"ID:{i}", (x, y - 75), cv2.FONT_HERSHEY_COMPLEX, 0.8, (255, 255, 255), 3)
                     cv2.putText(img,f"Roll:{r}",(x,y-55),cv2.FONT_HERSHEY_COMPLEX,0.8,(255,255,255),3)
                     cv2.putText(img, f"Name:{n}", (x, y - 30), cv2.FONT_HERSHEY_COMPLEX, 0.8, (255, 255, 255), 3)
                     cv2.putText(img, f"Department:{d}", (x, y - 5), cv2.FONT_HERSHEY_COMPLEX, 0.8, (255, 255, 255), 3)
+                    self.mark_attendance(i,r,n,d)
 
                 else:
                     cv2.rectangle(img,(x, y), (x + w, y + h), (0,0,255), 3)
@@ -186,6 +212,11 @@ class Face_Recognition_System:
 
         video_cap.release()
         cv2.destroyAllWindows()
+
+
+    def attendance_data(self):
+        self.new_window = Toplevel(self.root)
+        self.app = Attendance(self.new_window)
 
 
 
