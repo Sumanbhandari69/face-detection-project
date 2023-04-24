@@ -130,18 +130,25 @@ class Face_Recognition_System:
         messagebox.showinfo("Result","Training datasets completed!!")
     #Attendance
     def mark_attendance(self,i,r,n,d):
-        with open ("Attendance.csv","r+",newline="\n") as f:
+        with open("Attendance.csv","w+",newline="\n") as f:
             myDatalist = f.readline()
             name_list =[]
+
             for line in myDatalist:
                 entry = line.split((","))
                 name_list.append(entry[0])
 
-            if((i not in name_list) and (d not in name_list) and (n not in name_list) and (r not in name_list)):
+            # print(myDatalist)
+
+
+
+            if ((i not in name_list)and(n not in name_list)and(d not in name_list)and(r not in name_list)):
                 now = datetime.now()
                 d1 = now.strftime("%d/%m/%Y")
                 dtString = now.strftime("%H:%M:%S")
                 f.writelines(f"\n{i},{r},{n},{d},{dtString},{d1},Present")
+
+
 
 
 
@@ -179,7 +186,7 @@ class Face_Recognition_System:
 
 
 
-                if confidence>70:
+                if confidence>80:
                     cv2.putText(img, f"ID:{i}", (x, y - 75), cv2.FONT_HERSHEY_COMPLEX, 0.8, (255, 255, 255), 3)
                     cv2.putText(img,f"Roll:{r}",(x,y-55),cv2.FONT_HERSHEY_COMPLEX,0.8,(255,255,255),3)
                     cv2.putText(img, f"Name:{n}", (x, y - 30), cv2.FONT_HERSHEY_COMPLEX, 0.8, (255, 255, 255), 3)

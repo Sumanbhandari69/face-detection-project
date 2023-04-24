@@ -46,12 +46,12 @@ class Student:
         left_frame = LabelFrame(main_frame, bd=2,bg="white", relief=RIDGE,text="Student Details",font=("times new roman",15, "bold"))
         left_frame.place(x=10,y=10,width=720, height=600)
 
-        img_left= Image.open("./image_file/Student_image2.jpeg")
-        img_left = img_left.resize((720, 125), Image.LANCZOS)
-        self.photoimg_left = ImageTk.PhotoImage(img_left)
-
-        f_lbl = Label(left_frame, image=self.photoimg_left)
-        f_lbl.place(x=0, y=0, width=720, height=125)
+        # img_left= Image.open("./image_file/Student_image2.jpeg")
+        # img_left = img_left.resize((720, 125), Image.LANCZOS)
+        # self.photoimg_left = ImageTk.PhotoImage(img_left)
+        #
+        f_lbl = Label(left_frame, text="REGISTRATION", font=("times new roman",65, "bold"),bg="blue",fg="white")
+        f_lbl.place(x=0, y=0, width=715, height=110)
 
         #Current Courses
 
@@ -185,9 +185,9 @@ class Student:
         take_photo_btn = Button(operation_frame,command=self.generate_dataset, text="Take Photo", width=18, font=("times new roman", 15, "bold"),bg="blue",fg="white")
         take_photo_btn.grid(row=1, column=1)
 
-        # Update Photo button
-        update_photo_btn = Button(operation_frame, text="Update Photo", width=18, font=("times new roman", 15, "bold"),bg="blue",fg="white")
-        update_photo_btn.grid(row=1, column=2)
+        # # Update Photo button
+        # update_photo_btn = Button(operation_frame, text="Update Photo", width=18, font=("times new roman", 15, "bold"),bg="blue",fg="white")
+        # update_photo_btn.grid(row=1, column=2)
 
 
 
@@ -199,35 +199,35 @@ class Student:
                                 font=("times new roman", 15, "bold"))
         right_frame.place(x=750, y=10, width=700, height=600)
 
-        # search system
-        search_frame = LabelFrame(right_frame, bd=2, bg="white", relief=RIDGE, text="Search system",
-                                 font=("times new roman", 15, "bold"))
-        search_frame.place(x=10, y=5, width=680, height=80)
-
-        #Search label
-        search_label = Label(search_frame, text="Search By:", font=("times new roman", 15, "bold"))
-        search_label.grid(row=0, column=0,padx=10)
-
-        search_combo = ttk.Combobox(search_frame, font=("times new roman", 15, "bold"), width=15, state="readonly")
-        search_combo["values"] = ("Select", "StudentID", "Phone")
-        search_combo.current(0)
-        search_combo.grid(row=0, column=1)
-
-        #Search Entry
-        student_address_entry = ttk.Entry(search_frame, width=15, font=("times new roman", 15, "bold"))
-        student_address_entry.grid(row=0, column=2 )
-
-        #Search Button
-        search_btn = Button(search_frame, text="Search", width=7, font=("times new roman", 15, "bold"),bg="blue",fg="white")
-        search_btn.grid(row=0, column=3)
-
-        # ShowAll Button
-        showall_btn = Button(search_frame, text="Show all", width=8, font=("times new roman", 15, "bold"),bg="blue",fg="white")
-        showall_btn.grid(row=0, column=4)
+        # # search system
+        # search_frame = LabelFrame(right_frame, bd=2, bg="white", relief=RIDGE, text="Search system",
+        #                          font=("times new roman", 15, "bold"))
+        # search_frame.place(x=10, y=5, width=680, height=80)
+        #
+        # #Search label
+        # search_label = Label(search_frame, text="Search By:", font=("times new roman", 15, "bold"))
+        # search_label.grid(row=0, column=0,padx=10)
+        #
+        # search_combo = ttk.Combobox(search_frame, font=("times new roman", 15, "bold"), width=15, state="readonly")
+        # search_combo["values"] = ("Select", "StudentID", "Phone")
+        # search_combo.current(0)
+        # search_combo.grid(row=0, column=1)
+        #
+        # #Search Entry
+        # student_address_entry = ttk.Entry(search_frame, width=15, font=("times new roman", 15, "bold"))
+        # student_address_entry.grid(row=0, column=2 )
+        #
+        # #Search Button
+        # search_btn = Button(search_frame, text="Search", width=7, font=("times new roman", 15, "bold"),bg="blue",fg="white")
+        # search_btn.grid(row=0, column=3)
+        #
+        # # ShowAll Button
+        # showall_btn = Button(search_frame, text="Show all", width=8, font=("times new roman", 15, "bold"),bg="blue",fg="white")
+        # showall_btn.grid(row=0, column=4)
 
         #Table frame
         table_frame = LabelFrame(right_frame, bd=2, bg="white", relief=RIDGE)
-        table_frame.place(x=10, y=90, width=680, height=480)
+        table_frame.place(x=10, y=0, width=680, height=580)
 
         #Scroll Bar
         scroll_x = ttk.Scrollbar(table_frame, orient=HORIZONTAL)
@@ -443,7 +443,7 @@ class Student:
                         self.var_email.get(),
                         self.var_phone.get(),
                         self.var_radio1.get(),
-                        self.var_std_id.get()==id+1
+                        self.var_std_id.get()==id
                     ))
 
                 conn.commit()
