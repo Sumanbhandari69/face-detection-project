@@ -1,3 +1,4 @@
+import csv
 from tkinter import *
 from tkinter import ttk
 from PIL import Image,ImageTk
@@ -10,10 +11,11 @@ import mysql.connector
 from time import strftime
 from datetime import datetime
 from attendance import Attendance
+from developers import Developer
 #import cv2.face
 
 class Face_Recognition_System:
-    def __init__(self,root):
+    def __init__(self,root): 
         self.root = root
         self.root.geometry("1530x790+0+0")
         self.root.title("Facial Attendance System")
@@ -79,10 +81,10 @@ class Face_Recognition_System:
         img5 = img5.resize((250, 250), Image.LANCZOS)
         self.photoimg5 = ImageTk.PhotoImage(img5)
 
-        b5 = Button(bg_img, image=self.photoimg5, cursor="hand2")
+        b5 = Button(bg_img, image=self.photoimg5,command=self.developer_data, cursor="hand2")
         b5.place(x=600, y=450, width=250, height=250)
 
-        b5_1 = Button(bg_img, text="Developers", cursor="hand2", font=("times new roman", 20, "bold"),bg="blue",fg="white")
+        b5_1 = Button(bg_img, text="Developers", cursor="hand2",command=self.developer_data, font=("times new roman", 20, "bold"),bg="blue",fg="white")
         b5_1.place(x=600, y=700, width=250, height=40)
 
         # Exit Button
@@ -130,24 +132,21 @@ class Face_Recognition_System:
         messagebox.showinfo("Result","Training datasets completed!!")
     #Attendance
     def mark_attendance(self,i,r,n,d):
-        with open("Attendance.csv","w+",newline="\n") as f:
-            myDatalist = f.readline()
-            name_list =[]
 
-            for line in myDatalist:
-                entry = line.split((","))
-                name_list.append(entry[0])
+        with open("Attendance.csv", "r+", newline="\n") as f:
+            reader = csv.reader(f)
+            attendance_records = list(reader)
+            name_list = set(row[0] for row in attendance_records)
+            today = datetime.now().strftime("%d/%m/%Y")
+            today_marked = any(row[-2] == today and row[0] == i for row in attendance_records)
 
-            # print(myDatalist)
-
-
-
-            if ((i not in name_list)and(n not in name_list)and(d not in name_list)and(r not in name_list)):
+            if not today_marked:
                 now = datetime.now()
+                dt_string = now.strftime("%H:%M:%S")
                 d1 = now.strftime("%d/%m/%Y")
-                dtString = now.strftime("%H:%M:%S")
-                f.writelines(f"\n{i},{r},{n},{d},{dtString},{d1},Present")
-
+                with open("Attendance.csv", "a", newline="\n") as f:
+                    writer = csv.writer(f)
+                    writer.writerow([i, r, n, d, dt_string, d1, "Present"])
 
 
 
@@ -163,7 +162,8 @@ class Face_Recognition_System:
                 cv2.rectangle(img,(x,y),(x+w,y+h),(0,255,0),3)
                 id,predict=clf.predict(gray_image[y:y+h,x:x+w])
                 confidence =int((100*(1-predict/300)))
-                print(confidence)
+                # print(predict)
+                # print(confidence)
 
                 conn = mysql.connector.connect(host="localhost", username="root", password="9818913355",
                                                database="face_recognition")
@@ -224,6 +224,10 @@ class Face_Recognition_System:
     def attendance_data(self):
         self.new_window = Toplevel(self.root)
         self.app = Attendance(self.new_window)
+
+    def developer_data(self):
+        self.new_window = Toplevel(self.root)
+        self.app = Developer(self.new_window)
 
 
 

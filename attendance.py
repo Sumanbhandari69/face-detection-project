@@ -19,12 +19,14 @@ class Attendance:
         #Variables
 
         self.var_student_id = StringVar()
+        self.var_search_student_id = StringVar()
         self.var_roll = StringVar()
         self.var_name = StringVar()
         self.var_dep = StringVar()
         self.var_time = StringVar()
         self.var_date = StringVar()
         self.var_attendance = StringVar()
+        self.var_number_of_present_days = StringVar()
 
         # Background image
         img = Image.open("./image_file/background_image.jpeg")
@@ -94,29 +96,54 @@ class Attendance:
         student_status_label.grid(row=3, column=0, pady=20)
 
         status_combo = ttk.Combobox(left_frame,font=("times new roman", 15, "bold"), width=17,textvariable=self.var_attendance, state="readonly")
-        status_combo["values"] = ("Status", "Present","Absent")
+        status_combo["values"] = ("Present","Absent")
         status_combo.current(0)
         status_combo.grid(row=3, column=1, padx=10, pady=20)
+
+        #Count for present days
+
+        count_number_days_label = Label(left_frame, text="Total Present Days:", font=("times new roman", 15, "bold"))
+        count_number_days_label.grid(row=3, column=2, pady=20)
+
+        count_number_days_entry = ttk.Entry(left_frame, width=20, textvariable=self.var_number_of_present_days, font=("times new roman", 15, "bold"))
+        count_number_days_entry.grid(row=3, column=3, pady=20)
+
+
+
+
 
         # Operation Frame
         operation_frame = LabelFrame(left_frame, bd=3, bg="white", relief=RIDGE, )
         operation_frame.place(x=0, y=350, width=695, height=45 )
 
         # Import csv button
-        save_btn = Button(operation_frame, text="Import csv",command=self.import_csv, width=14,font=("times new roman", 15, "bold"), bg="blue", fg="white")
-        save_btn.grid(row=0, column=0)
+        import_csv_btn = Button(operation_frame, text="Import csv",command=self.import_csv, width=14,font=("times new roman", 15, "bold"), bg="blue", fg="white")
+        import_csv_btn.grid(row=0, column=0)
 
         # Export csv button"
-        update_btn = Button(operation_frame, text="Export csv",command=self.export_csv, width=14,font=("times new roman", 15, "bold"), bg="blue", fg="white")
-        update_btn.grid(row=0, column=1)
+        export_csv_btn = Button(operation_frame, text="Export csv",command=self.export_csv, width=14,font=("times new roman", 15, "bold"), bg="blue", fg="white")
+        export_csv_btn.grid(row=0, column=1)
 
-        # Delete button
-        delete_btn = Button(operation_frame, text="Update", width=14,font=("times new roman", 15, "bold"), bg="blue", fg="white")
-        delete_btn.grid(row=0, column=2)
+        # Update button
+        update_btn = Button(operation_frame, text="Update",command=self.call_update, width=14,font=("times new roman", 15, "bold"), bg="blue", fg="white")
+        update_btn.grid(row=0, column=2)
 
         # Reset button
         reset_btn = Button(operation_frame, text="Reset",command=self.reset_data, width=14,font=("times new roman", 15, "bold"), bg="blue", fg="white")
         reset_btn.grid(row=0, column=3)
+
+        # Search Frame
+        search_frame = LabelFrame(left_frame, bd=3, bg="white", relief=RIDGE, )
+        search_frame.place(x=0, y=450, width=550, height=60)
+
+        student_ID_search_label = Label(search_frame, text="Student Id:", font=("times new roman", 15, "bold"))
+        student_ID_search_label.grid(row=0, column=0,padx=10,pady=10)
+
+        student_ID_search_entry = ttk.Entry(search_frame, width=20,textvariable=self.var_search_student_id, font=("times new roman", 15, "bold"))
+        student_ID_search_entry.grid(row=0, column=1,padx=10,pady=10)
+
+        search_btn = Button(search_frame, text="Search", width=14,command=self.search_data, font=("times new roman", 15, "bold"), bg="blue", fg="white")
+        search_btn.grid(row=0, column=3)
 
 
 
@@ -169,7 +196,7 @@ class Attendance:
     #import CSV
     def import_csv(self):
         global mydata
-        # mydata.clear()
+        mydata.clear()
         fln = filedialog.askopenfilename(initialdir=os.getcwd(),title="Open Csv",filetypes=(("CSV File","*.csv"),("ALL File","*.*")),parent=self.root)
         with open(fln) as myfile:
             csvread = csv.reader(myfile,delimiter=",")
@@ -206,6 +233,67 @@ class Attendance:
         self.var_time.set(rows[4])
         self.var_date.set(rows[5])
         self.var_attendance.set(rows[6])
+        # self.var_number_of_present_days.set(2)
+
+
+
+    def search_value(self,value):
+        matches = []
+        with open("Attendance.csv","r",newline="\n") as file:
+            reader = csv.reader(file)
+            for row in reader:
+                if value in row:
+                    matches.append(row)
+
+        return matches
+
+    def search_data(self):
+        st_id = self.var_search_student_id.get()
+        # print(st_id)
+        search_result = self.search_value(st_id)
+        # for row in search_result:
+        self.fetch_data(search_result)
+        self.print_count(st_id)
+
+
+
+    def count_values(self):
+        counts = {}
+        with open("Attendance.csv","r",newline="\n") as file:
+            reader = csv.reader(file)
+            for row in reader:
+                i = row[0]
+                status = row[6]
+                if status == "Present":
+                    if i in counts:
+                        counts[i] += 1
+                    else:
+                        counts[i] = 1
+        return counts
+
+    def print_count(self,i):
+        self.value_counts = self.count_values()
+        value = self.value_counts[i]
+        self.var_number_of_present_days.set(value)
+
+    def update_data(self,i,date,new_status):
+        with open("Attendance.csv","r") as file:
+            reader = csv.reader(file)
+            entires = list(reader)
+
+        for entry in entires:
+            if entry[0] == i and entry[5] == date:
+                entry[6] = new_status
+
+        with open("Attendance.csv","w",newline="") as file:
+            writer = csv.writer(file)
+            writer.writerows(entires)
+
+    def call_update(self):
+        i = self.var_student_id.get()
+        d = self.var_date.get()
+        status = self.var_attendance.get()
+        self.update_data(i,d,status)
 
     #Reset data
     def reset_data(self):
@@ -215,7 +303,8 @@ class Attendance:
         self.var_dep.set("")
         self.var_time.set("")
         self.var_date.set("")
-        self.var_attendance.set("Status")
+        self.var_number_of_present_days.set("")
+        self.var_attendance.set("Present")
 
 
 
