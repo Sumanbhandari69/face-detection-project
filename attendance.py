@@ -121,7 +121,7 @@ class Attendance:
         import_csv_btn.grid(row=0, column=0)
 
         # Export csv button"
-        export_csv_btn = Button(operation_frame, text="Export csv",command=self.export_csv, width=14,font=("times new roman", 15, "bold"), bg="blue", fg="white")
+        export_csv_btn = Button(operation_frame, text="Generate Report",command=self.export_csv, width=14,font=("times new roman", 15, "bold"), bg="blue", fg="white")
         export_csv_btn.grid(row=0, column=1)
 
         # Update button
@@ -206,22 +206,38 @@ class Attendance:
 
     # Export CSV
     def export_csv(self):
-        try:
-            if len(mydata)<1:
-                messagebox.showerror("No Data","No Data found to export",parent=self.root)
-                return False
-            fln = filedialog.asksaveasfilename(initialdir=os.getcwd(), title="Open Csv",
-                                         filetypes=(("CSV File", "*.csv"), ("ALL File", "*.*")), parent=self.root)
-            with open(fln,mode="w",newline="") as myfile:
-                exp_write = csv.writer(myfile,delimiter=",")
-                for i in mydata:
-                    exp_write.writerow(i)
-                messagebox.showinfo("Data Export","Your Data Exported"+os.path
-                                    .basename(fln)+"Successfully")
+        conn = mysql.connector.connect(host="localhost", username="root", password="9818913355",
+                                       database="face_recognition")
+        my_cursor = conn.cursor()
 
-        except Exception as es:
-            messagebox.showerror("Error",f"Due to :{str(es)}",parent=self.root)
+        my_cursor.execute("Select Student_ID, Name, Year from student")
+        student_records = my_cursor.fetchall()
 
+        report = {}
+        for student in student_records:
+            student_id, student_name, registered_year = student
+            present_days = 0
+
+            with open("Attendance.csv","r",newline="\n") as file:
+                reader = csv.reader(file)
+                for row in reader:
+                    if row[0] == student_id and row[6] == "Present":
+                        present_days += 1
+
+            if registered_year not in report:
+                report[registered_year] = []
+
+            report[registered_year].append((student_id,student_name,present_days))
+
+        for registered_year, data in report.items():
+            filename = f"Attendance_{registered_year}.csv"
+            with open(filename,"w",newline="\n") as file:
+                writer = csv.writer(file)
+                writer.writerow(["Student Id","Name","Present Days"])
+                for entry in data:
+                    writer.writerow(entry)
+        messagebox.showinfo("Successfull","Attendance Report has been generated",parent=self.root)
+        conn.close()
     def get_cursor(self,event=""):
         cursor_row = self.AttendanceReportTable.focus()
         content = self.AttendanceReportTable.item(cursor_row)
@@ -233,7 +249,7 @@ class Attendance:
         self.var_time.set(rows[4])
         self.var_date.set(rows[5])
         self.var_attendance.set(rows[6])
-        # self.var_number_of_present_days.set(2)
+        # self.var_number_of_present_days.set(value)
 
 
 
@@ -275,6 +291,7 @@ class Attendance:
         self.value_counts = self.count_values()
         value = self.value_counts[i]
         self.var_number_of_present_days.set(value)
+        # self.get_cursor(value)
 
     def update_data(self,i,date,new_status):
         with open("Attendance.csv","r") as file:

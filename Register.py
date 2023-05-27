@@ -3,6 +3,7 @@ from tkinter import ttk
 from tkinter import messagebox
 from PIL import Image,ImageTk
 import mysql.connector
+from cryptography.fernet import Fernet
 
 class Register:
     def __init__(self,root):
@@ -101,43 +102,55 @@ class Register:
         self.root.destroy()
         import Login
 
+    import hashlib
+
+    from cryptography.fernet import Fernet
+
     def register_data(self):
-        if self.var_fname.get()=="" or self.var_lname.get()=="" or self.var_contact.get()=="" or self.var_email.get()=="" or self.var_securityqn.get()=="Select" or self.var_answer.get()=="" or \
-                self.var_password.get()=="" or self.var_confirmpw.get()=="":
-             messagebox.showerror("Error","All Fields Are Required.",parent=self.root)
-        elif self.var_password.get()!= self.var_confirmpw.get():
-            messagebox.showerror("Error","Password and Confirm Password should be same.",parent=self.root)
-        elif self.var_terms.get()==0:
-            messagebox.showerror("Error","All Fields Are Required.",parent=self.root)
+        if self.var_fname.get() == "" or self.var_lname.get() == "" or self.var_contact.get() == "" or self.var_email.get() == "" or self.var_securityqn.get() == "Select" or self.var_answer.get() == "" or \
+                self.var_password.get() == "" or self.var_confirmpw.get() == "":
+            messagebox.showerror("Error", "All Fields Are Required.", parent=self.root)
+        elif self.var_password.get() != self.var_confirmpw.get():
+            messagebox.showerror("Error", "Password and Confirm Password should be same.", parent=self.root)
+        elif self.var_terms.get() == 0:
+            messagebox.showerror("Error", "All Fields Are Required.", parent=self.root)
         else:
-            conn = mysql.connector.connect(host="localhost",user="root",password="9818913355",database="face_recognition")
+            conn = mysql.connector.connect(host="localhost", user="root", password="9818913355",
+                                           database="face_recognition")
             cursor = conn.cursor()
-            query = ("select * from register where email = %s")
+            query = "SELECT * FROM register WHERE email = %s"
             value = (self.var_email.get(),)
-            cursor.execute(query,value)
+            cursor.execute(query, value)
             row = cursor.fetchone()
-            if row != None:
-                messagebox.showerror("Error","User already exist,Please Enter another Email")
+            if row is not None:
+                messagebox.showerror("Error", "User already exists. Please enter another email.")
             else:
-                cursor.execute("insert into register values(%s,%s,%s,%s,%s,%s,%s)",(
-                                                                                    self.var_fname.get(),
-                                                                                    self.var_lname.get(),
-                                                                                    self.var_contact.get(),
-                                                                                    self.var_email.get(),
-                                                                                    self.var_securityqn.get(),
-                                                                                    self.var_answer.get(),
-                                                                                    self.var_password.get()
-                                                                                ))
-            conn.commit()
-            conn.close()
-            messagebox.showinfo("Success","Successfully Registered")
+                # Generate a new Fernet key
+                key = Fernet.generate_key()
 
+                # Create a Fernet cipher using the key
+                cipher = Fernet(key)
 
+                # Encrypt the password
+                encrypted_password = cipher.encrypt(self.var_password.get().encode())
 
-              
+                # Insert the encrypted password into the database
+                query = "INSERT INTO register (fname, lname, contact, email, securityQ, answer, password, encryption_key) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+                values = (
+                    self.var_fname.get(),
+                    self.var_lname.get(),
+                    self.var_contact.get(),
+                    self.var_email.get(),
+                    self.var_securityqn.get(),
+                    self.var_answer.get(),
+                    encrypted_password,
+                    key
+                )
+                cursor.execute(query, values)
 
-
-        
+                conn.commit()
+                conn.close()
+                messagebox.showinfo("Success", "Successfully Registered")
 
 
 root=Tk()
