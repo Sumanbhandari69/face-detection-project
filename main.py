@@ -1,4 +1,5 @@
 import csv
+import tkinter.messagebox
 from tkinter import *
 from tkinter import ttk
 from PIL import Image,ImageTk
@@ -92,11 +93,28 @@ class Face_Recognition_System:
         img6 = img6.resize((250, 250), Image.LANCZOS)
         self.photoimg6 = ImageTk.PhotoImage(img6)
 
-        b6 = Button(bg_img, image=self.photoimg6, cursor="hand2")
+        b6 = Button(bg_img, image=self.photoimg6, cursor="hand2",command=self.iExit)
         b6.place(x=1000, y=450, width=250, height=250)
 
-        b6_1 = Button(bg_img, text="Exit", cursor="hand2", font=("times new roman", 20, "bold"),bg="blue",fg="white")
+        b6_1 = Button(bg_img, text="Exit", cursor="hand2", font=("times new roman", 20, "bold"),bg="blue",fg="white",command=self.iExit)
         b6_1.place(x=1000, y=700, width=250, height=40)
+
+        def time():
+            string=strftime('%H:%M:%S %p')
+            lbl.config(text=string)
+            lbl.after(1000,time)
+
+        lbl=Label(title_lbl,font=("times new roman", 15, "bold"),bg="blue",fg="white")
+        lbl.place(x=10,y=0, width=110, height=50)
+        time()
+
+
+    def iExit(self):
+        self.iExit=tkinter.messagebox.askyesno("Face Recognition","Are you sure to exit? ",parent=self.root)
+        if self.iExit >0:
+            self.root.destroy()
+        else:
+            return
 
 
     #=========Functions button==========
